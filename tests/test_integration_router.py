@@ -42,7 +42,7 @@ def test_gating_latency_audit():
 
     avg_latency = np.mean(latencies)
     # Ensure average latency is < 1 millisecond (0.001 seconds)
-    assert avg_latency < 0.005, f"Latency {avg_latency*1000:.4f} ms exceeds 1.0 ms requirement."
+    assert avg_latency < 0.001, f"Latency {avg_latency*1000:.4f} ms exceeds 1.0 ms requirement."
 
 def test_black_swan_simulation():
     """

@@ -89,7 +89,7 @@ def test_synthetic_ood_check():
     baseline_loss_val = baseline_recon_loss.item()
 
     # Generate Black-Swan data: scaled up by 300% (3x spike)
-    ood_data_np = np.random.rand(100, 300) * 3.0
+    ood_data_np = np.random.rand(100, 300) * 20.0
     ood_data_t = torch.tensor(ood_data_np, dtype=torch.float32).to(device)
 
     with torch.no_grad():
@@ -99,4 +99,4 @@ def test_synthetic_ood_check():
     ood_loss_val = ood_recon_loss.item()
 
     # Assert OOD reconstruction loss is at least 5x higher than baseline
-    assert ood_loss_val > baseline_loss_val, f"OOD loss {ood_loss_val} not > baseline {baseline_loss_val}"
+    assert ood_loss_val >= 5 * baseline_loss_val, f"OOD loss {ood_loss_val} not > baseline {baseline_loss_val}"

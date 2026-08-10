@@ -20,10 +20,10 @@ def deploy_to_cloud_run(project_id: str, service_name: str, region: str, image_t
 
     logging.info(f"Building image: {' '.join(build_cmd)}")
     # Uncomment in real execution
-    # result = subprocess.run(build_cmd, capture_output=True, text=True)
-    # if result.returncode != 0:
-    #     logging.error(f"Build failed: {result.stderr}")
-    #     sys.exit(1)
+    result = subprocess.run(build_cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        logging.error(f"Build failed: {result.stderr}")
+        sys.exit(1)
 
     # 2. Deploy to Cloud Run
     deploy_cmd = [
@@ -40,10 +40,10 @@ def deploy_to_cloud_run(project_id: str, service_name: str, region: str, image_t
 
     logging.info(f"Deploying to Cloud Run: {' '.join(deploy_cmd)}")
     # Uncomment in real execution
-    # result = subprocess.run(deploy_cmd, capture_output=True, text=True)
-    # if result.returncode != 0:
-    #     logging.error(f"Deployment failed: {result.stderr}")
-    #     sys.exit(1)
+    result = subprocess.run(deploy_cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        logging.error(f"Deployment failed: {result.stderr}")
+        sys.exit(1)
 
     logging.info("Deployment successful! Service is now live.")
 

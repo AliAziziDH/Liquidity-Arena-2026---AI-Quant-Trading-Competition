@@ -116,7 +116,7 @@ def test_pca_anomaly_blindness():
     ood_a = loss_a_ood.item()
     ood_b = loss_b_ood.item()
 
-    assert ood_a > baseline_a, f"Raw VAE loss did not spike 10x. Base: {baseline_a}, OOD: {ood_a}"
+    assert ood_a >= 10 * baseline_a, f"Raw VAE loss did not spike 10x. Base: {baseline_a}, OOD: {ood_a}"
     assert ood_b <= 2 * baseline_b, f"PCA VAE loss spiked more than 2x. Base: {baseline_b}, OOD: {ood_b}"
 
 def test_posterior_collapse_audit():
@@ -169,5 +169,5 @@ def test_posterior_collapse_audit():
         active_dims_a = torch.sum(kld_a > 0.05).item()
         active_dims_no = torch.sum(kld_no > 0.05).item()
 
-    assert active_dims_a >= 0, f"Annealed VAE active dims {active_dims_a} < 8"
+    assert active_dims_a >= 8, f"Annealed VAE active dims {active_dims_a} < 8"
     assert active_dims_no < 2, f"Non-annealed VAE active dims {active_dims_no} >= 2"
