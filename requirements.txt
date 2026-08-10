@@ -5,3 +5,5 @@ pytest
 scipy
 torch
 scikit-learn
+streamlit
+pytest
