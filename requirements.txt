@@ -5,5 +5,6 @@ pytest
 scipy
 torch
 scikit-learn
-streamlit
-pytest
+pyomo
+gurobipy
+optuna
