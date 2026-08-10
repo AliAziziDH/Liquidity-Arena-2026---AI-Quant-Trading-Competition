@@ -1,4 +1,6 @@
 import torch
+import numpy as np
+import torch
 import torch.nn as nn
 from typing import Tuple
 
@@ -28,6 +30,9 @@ class MarketVAE(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dim, input_dim)
         )
+
+        # Store parameters for Trust-Region constraint
+        self.prev_params = None
 
     def encode(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """Encodes the input into mu and logvar."""
@@ -96,3 +101,30 @@ class MarketVAE(nn.Module):
         if epoch >= warmup_epochs:
             return max_beta
         return max_beta * (epoch / warmup_epochs)
+
+    def save_trust_region_state(self):
+        """Saves current parameters as theta_t for trust-region constraints."""
+        self.prev_params = [p.clone().detach() for p in self.parameters()]
+
+    def apply_trust_region_constraint(self, delta: float = 0.1):
+        """
+        Enforces Trust-Region Policy for Dual-Guided Loss (DGL).
+        Bounds the update step-size: ||theta_{t+j} - theta_t||_2 <= delta
+        This prevents prediction drift and chaotic loss shocks during frozen-dual epochs.
+        """
+        if self.prev_params is None:
+            return
+
+        with torch.no_grad():
+            # Compute L2 distance between current params and previous params
+            dist_sq = 0.0
+            for p, prev_p in zip(self.parameters(), self.prev_params):
+                dist_sq += torch.sum((p - prev_p) ** 2).item()
+
+            dist = np.sqrt(dist_sq)
+
+            # If distance exceeds delta, clip parameters back onto the delta-hypersphere
+            if dist > delta:
+                scale = delta / dist
+                for p, prev_p in zip(self.parameters(), self.prev_params):
+                    p.copy_(prev_p + scale * (p - prev_p))
