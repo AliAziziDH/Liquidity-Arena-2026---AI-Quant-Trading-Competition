@@ -15,12 +15,6 @@ def run_backtest():
 
     vae_model = MarketVAE(input_dim=300, latent_dim=16).to(device)
     sizer = ConformalSizer(kappa=0.15)
-
-    # Seed the conformal sizer with baseline errors to prevent division by zero or zero-size outputs
-    np.random.seed(42)
-    baseline_errors = np.random.uniform(0.01, 0.05, 500)
-    for err in baseline_errors:
-        sizer.add_error(err, sigma_m=0.02, L_t=0.05)
     risk_gate = RiskGate(max_notional_cap=15000.0)
     router = HeuristicRouter(vae_model, sizer, risk_gate, ema_lambda=0.9)
 
@@ -31,7 +25,7 @@ def run_backtest():
 
     # Let's generate dummy data for the competition
     # Shape: (1000, 300)
-    num_ticks = 1000
+    num_ticks = 130
     features = torch.randn(num_ticks, 300).to(device)
     prices = np.linspace(100.0, 110.0, num_ticks)
 
@@ -70,10 +64,6 @@ def run_backtest():
 
         proposed_size = router.route(state_vector, mu_hat, current_portfolio)
 
-        # Calculate and dynamically add current_error to the sizer
-        current_error = abs(mu_hat - 0.0) # Approximate error, true target is unknown
-        sizer.add_error(current_error, sigma_m=0.02, L_t=0.05)
-
         # Generate some synthetic execution logic if proposed_size changes
         target_size = proposed_size
         size_diff = target_size - env.position_size
@@ -87,10 +77,7 @@ def run_backtest():
 
         predictions.append(target_size)
 
-    df = pd.DataFrame({
-        "id": list(range(len(predictions))),
-        "Prediction": predictions
-    })
+    df = pd.DataFrame({"Prediction": predictions})
     df.to_csv("submission.csv", index=False)
     print("Backtest completed. Results saved to submission.csv")
     print(f"Final Equity: {env.get_account_equity()}")
