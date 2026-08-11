@@ -77,7 +77,10 @@ def run_backtest():
 
         predictions.append(target_size)
 
-    df = pd.DataFrame({"Prediction": predictions})
+    df = pd.DataFrame({
+        "id": list(range(len(predictions))),
+        "Prediction": predictions
+    })
     df.to_csv("submission.csv", index=False)
     print("Backtest completed. Results saved to submission.csv")
     print(f"Final Equity: {env.get_account_equity()}")
