@@ -15,6 +15,12 @@ def run_backtest():
 
     vae_model = MarketVAE(input_dim=300, latent_dim=16).to(device)
     sizer = ConformalSizer(kappa=0.15)
+
+    # Seed the conformal sizer with baseline errors to prevent division by zero or zero-size outputs
+    np.random.seed(42)
+    baseline_errors = np.random.uniform(0.01, 0.05, 500)
+    for err in baseline_errors:
+        sizer.add_error(err, sigma_m=0.02, L_t=0.05)
     risk_gate = RiskGate(max_notional_cap=15000.0)
     router = HeuristicRouter(vae_model, sizer, risk_gate, ema_lambda=0.9)
 
@@ -63,6 +69,10 @@ def run_backtest():
         mu_hat = mu_hats[t]
 
         proposed_size = router.route(state_vector, mu_hat, current_portfolio)
+
+        # Calculate and dynamically add current_error to the sizer
+        current_error = abs(mu_hat - 0.0) # Approximate error, true target is unknown
+        sizer.add_error(current_error, sigma_m=0.02, L_t=0.05)
 
         # Generate some synthetic execution logic if proposed_size changes
         target_size = proposed_size
