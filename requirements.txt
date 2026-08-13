@@ -10,3 +10,4 @@ gurobipy
 optuna
 matplotlib
 streamlit
+python-dotenv
