@@ -8,5 +8,5 @@ scikit-learn
 pyomo
 gurobipy
 optuna
-import matplotlib
+matplotlib
 streamlit
